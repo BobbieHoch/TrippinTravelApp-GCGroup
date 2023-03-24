@@ -1,4 +1,3 @@
-import { Router, Request, Response } from "express";
 import { Photo } from "../models/placePhotos";
 import googconfig from "../config/config";
 import axios from "axios";

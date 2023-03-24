@@ -1,10 +1,8 @@
 import axios from "axios";
-import router from "express";
-import googconfig from "../config/config";
 import { NearbySearch } from "../models/nearbySearch";
 
-const key = googconfig;
-let radius = 5000;
+const key = "AIzaSyADw6kne2LUqaF8G-njq1U66rgpNkOgM7c";
+
 
 export function getNearbySearch(
   lat: Number,
