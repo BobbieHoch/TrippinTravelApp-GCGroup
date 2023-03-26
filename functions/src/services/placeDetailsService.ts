@@ -1,3 +1,4 @@
+
 import { PlaceDetails } from "../models/placeDetails";
 import axios from "axios";
 
@@ -12,4 +13,5 @@ export function getDetails(place_id: String): Promise<PlaceDetails> {
       }
     )
     .then((response) => response.data);
+
 }
