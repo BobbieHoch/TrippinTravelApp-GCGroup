@@ -14,7 +14,7 @@ itineraryRoutes.get(
 
       const result = client
         .db("final")
-        .collection<Itinerary>("Itineraries")
+        .collection<Itinerary>("itineraries")
         .find({})
         .toArray();
       return res.status(200).json(result);
