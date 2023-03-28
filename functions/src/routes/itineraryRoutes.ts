@@ -57,7 +57,7 @@ itineraryRoutes.post(
       const client = await getClient();
 
       await client
-        .db("finals")
+        .db("final")
         .collection<Itinerary>("itineraries")
         .insertOne(newTrip);
 
