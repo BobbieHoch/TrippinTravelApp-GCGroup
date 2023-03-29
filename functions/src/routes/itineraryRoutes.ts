@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getClient } from "../db";
 import { Itinerary } from "../models/itinerary";
-import { ObjectId } from "mongodb";
+import { ObjectId, RemoveUserOptions } from "mongodb";
 
 export const itineraryRoutes = express.Router();
 
@@ -69,43 +69,71 @@ itineraryRoutes.post(
 );
 
 //Edit a trip, Name, date, option  (named and date place is saved)
-itineraryRoutes.put("/itinerary/:id", async (req: Request, res: Response) => {
-  const itineraryId = req.params.id;
-  const updatedItinerary: Itinerary = req.body;
-  try {
-    const client = await getClient();
-    const results = await client
-      .db("final")
-      .collection("itineraries")
-      .findOneAndUpdate({ _id: new ObjectId(itineraryId) }, updatedItinerary);
-    if (!results) {
-      return res.status(404).json({ message: "Itinerary not found" });
-    }
+itineraryRoutes.put(
+  "/itinerary/:id",
+  async (req: Request, res: Response): Promise<Response> => {
+    const itineraryId = req.params.id;
+    const updatedItinerary: Itinerary = req.body;
+    try {
+      const client = await getClient();
+      const results = await client
+        .db("final")
+        .collection("itineraries")
+        .updateOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
+      if (!results) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
 
-    return res.json(results);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+      return res.json(results);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error" });
+    }
   }
-});
-//delete option from trip
+);
+
+//delete 1 option from trip
+itineraryRoutes.delete(
+  "/:id",
+  async (req: Request, res: Response): Promise<Response> => {
+    const id = req.params.id;
+    try {
+      const client = await getClient();
+      const result = await client
+        .db("final")
+        .collection<Itinerary>("itineraries")
+        .deleteOne({ _id: ObjectId });
+      if (!result) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
+
+      return res.json({ message: "Itinerary option deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  }
+);
 
 //delete entire trip
-itineraryRoutes.delete("/:id", async (req: Request, res: Response) => {
-  const id = req.params.id;
-  try {
-    const client = await getClient();
-    const result = await client
-      .db("final")
-      .collection<Itinerary>("itineraries")
-      .deleteOne({ _id: new ObjectId(id) });
-    if (!result) {
-      return res.status(404).json({ message: "Itinerary not found" });
-    }
+itineraryRoutes.delete(
+  "/",
+  async (req: Request, res: Response): Promise<Response> => {
+    const id = req.params.id;
+    try {
+      const client = await getClient();
+      const result = await client
+        .db("final")
+        .collection<Itinerary>("itineraries")
+        .deleteMany({ _id: new ObjectId(id) });
+      if (!result) {
+        return res.status(404).json({ message: "Itinerary not found" });
+      }
 
-    return res.json({ message: "Itinerary deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Server error" });
+      return res.json({ message: "Itinerary deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Server error" });
+    }
   }
-});
+);
