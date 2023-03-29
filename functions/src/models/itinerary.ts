@@ -1,11 +1,11 @@
 import { ObjectId } from "mongodb";
 
 export interface Itinerary {
-    name: string;
-    startDate: string;
-    endDate: string;
-    Place: Place[];
-    _id: ObjectId;
+    destination: string;
+    startDate?: string;
+    endDate?: string;
+    place?: Place[],
+    _id?: ObjectId;
     lat: number;
     lng: number;
 }
