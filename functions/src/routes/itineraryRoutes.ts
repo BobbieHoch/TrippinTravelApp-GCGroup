@@ -57,7 +57,7 @@ itineraryRoutes.post(
       const client = await getClient();
 
       await client
-        .db("finals")
+        .db("final")
         .collection<Itinerary>("itineraries")
         .insertOne(newTrip);
 
@@ -69,15 +69,17 @@ itineraryRoutes.post(
 );
 
 //Edit a trip, Name, date, option  (named and date place is saved)
-itineraryRoutes.put("/itinerary/:id", async (req: Request, res: Response) => {
+itineraryRoutes.put("/:id", async (req: Request, res: Response) => {
   const itineraryId = req.params.id;
-  const updatedItinerary: Itinerary = req.body;
+  const updatedItinerary = req.body as Itinerary;
+  delete updatedItinerary._id;
   try {
     const client = await getClient();
+    
     const results = await client
       .db("final")
       .collection("itineraries")
-      .findOneAndUpdate({ _id: new ObjectId(itineraryId) }, updatedItinerary);
+      .replaceOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
     if (!results) {
       return res.status(404).json({ message: "Itinerary not found" });
     }
@@ -85,7 +87,7 @@ itineraryRoutes.put("/itinerary/:id", async (req: Request, res: Response) => {
     return res.json(results);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: `Server error ${console.error(error)}` });
   }
 });
 //delete option from trip
