@@ -70,16 +70,16 @@ itineraryRoutes.post(
 
 //Edit a trip, Name, date, option  (named and date place is saved)
 itineraryRoutes.put(
-  "/itinerary/:id",
+  "/:id",
   async (req: Request, res: Response): Promise<Response> => {
     const itineraryId = req.params.id;
-    const updatedItinerary: Itinerary = req.body;
+    const updatedItinerary = req.body as Itinerary;
     try {
       const client = await getClient();
       const results = await client
         .db("final")
         .collection("itineraries")
-        .updateOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
+        .replaceOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
       if (!results) {
         return res.status(404).json({ message: "Itinerary not found" });
       }
