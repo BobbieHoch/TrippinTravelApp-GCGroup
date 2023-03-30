@@ -102,7 +102,7 @@ itineraryRoutes.delete(
       const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
-        .deleteOne({ _id: ObjectId });
+        .deleteOne({ _id: new ObjectId(id) });
       if (!result) {
         return res.status(404).json({ message: "Itinerary not found" });
       }
@@ -117,7 +117,7 @@ itineraryRoutes.delete(
 
 //delete entire trip
 itineraryRoutes.delete(
-  "/",
+  "/:id",
   async (req: Request, res: Response): Promise<Response> => {
     const id = req.params.id;
     try {
@@ -125,7 +125,7 @@ itineraryRoutes.delete(
       const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
-        .deleteMany({ _id: new ObjectId(id) });
+        .deleteOne({ _id: new ObjectId(id) });
       if (!result) {
         return res.status(404).json({ message: "Itinerary not found" });
       }
@@ -137,3 +137,33 @@ itineraryRoutes.delete(
     }
   }
 );
+
+itineraryRoutes.delete("/:id/:name", async (req: Request, res: Response) => {
+  // Extract the ID parameter from the request
+  const id = req.params.id;
+  const name = req.params.name;
+
+  try {
+    // Connect to the MongoDB database
+    const client = await getClient();
+
+    // Get a reference to the trips collection
+    const result = await client
+      .db("final")
+      .collection<Itinerary>("itineraries")
+      .updateOne(
+        { _id: new ObjectId(id) },
+        { $pull: { place: { name: name } } }
+      );
+
+    // Check if the object was deleted successfully
+    if (result.modifiedCount === 1) {
+      res.status(200).send(`From ID ${id}, ${name} was deleted.`);
+    } else {
+      res.status(404).send(`Object with ID ${id} not found`);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
