@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { getClient } from "../db";
 import { Itinerary } from "../models/itinerary";
 import { ObjectId, RemoveUserOptions } from "mongodb";
+import { Place } from "../models/itinerary";
 
 export const itineraryRoutes = express.Router();
 
@@ -167,3 +168,26 @@ itineraryRoutes.delete("/:id/:name", async (req: Request, res: Response) => {
     res.status(500).send("Internal server error");
   }
 });
+
+// itineraryRoutes.delete("/:id", async (res: Response, req: Request) => {
+//   const id = req.params.id;
+//   try {
+//     const client = await getClient();
+//     const placeIdToDelete = new ObjectId(id); // replace with actual ObjectId of the document you want to delete
+
+//     // assuming you have a MongoClient instance set up and connected to your MongoDB database
+//     const result = await client
+//       .db("final")
+//       .collection<Place>("itineraries")
+//       .deleteOne({ _id: placeIdToDelete });
+
+//     if (result.deletedCount === 1) {
+//       console.log(`Successfully deleted place with id ${placeIdToDelete}`);
+//     } else {
+//       console.log(`Could not delete place with id ${placeIdToDelete}`);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Internal server error");
+//   }
+// });
