@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { getNearbySearch } from "../services/nearbySearchService";
+import { getNearbySearch } from "../services/nearbySearchServices";
 import { getDetails } from "../services/placeDetailsService";
 import { getPlacePhotos } from "../services/placePhotosService";
 import { getTextSearch } from "../services/textSearchService";

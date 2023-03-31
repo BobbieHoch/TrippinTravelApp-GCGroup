@@ -13,7 +13,7 @@ itineraryRoutes.get(
     try {
       const client = await getClient();
 
-      const result = client
+      const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
         .find({})
@@ -27,18 +27,18 @@ itineraryRoutes.get(
 
 //get options trip name and its details
 itineraryRoutes.get(
-  "/:name",
+  "/:id",
   async (req: Request, res: Response): Promise<Response> => {
-    const nameTrip = req.params.name as string;
+    const id = new ObjectId(req.params.id);
     try {
       const client = await getClient();
       const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
-        .findOne({ name: nameTrip });
+        .findOne({ _id: id });
 
       if (!result) {
-        return res.status(404).send("Trip not found");
+        return res.status(404).send("Itinerary not found");
       }
 
       return res.status(200).json(result);
