@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import { getClient } from "../db";
 import { Itinerary } from "../models/itinerary";
-import { ObjectId, RemoveUserOptions } from "mongodb";
-import { Place } from "../models/itinerary";
+import { ObjectId } from "mongodb";
+
 
 export const itineraryRoutes = express.Router();
 
