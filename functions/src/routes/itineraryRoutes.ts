@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getClient } from "../db";
-import { Itinerary } from "../models/itinerary";
+import { Itinerary, Place } from "../models/itinerary";
 import { ObjectId } from "mongodb";
 
 
@@ -73,19 +73,24 @@ itineraryRoutes.post(
 itineraryRoutes.put(
   "/:id",
   async (req: Request, res: Response): Promise<Response> => {
+    const place = req.body as Place;
     const itineraryId = req.params.id;
-    const updatedItinerary = req.body as Itinerary;
+
     try {
       const client = await getClient();
-      const results = await client
+      const result = await client
         .db("final")
         .collection("itineraries")
-        .replaceOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
-      if (!results) {
+        .updateOne(
+          { place_id: itineraryId },
+          { $push: { place: place } }
+        );
+
+      if (result.modifiedCount === 0) {
         return res.status(404).json({ message: "Itinerary not found" });
       }
 
-      return res.json(results);
+      return res.json({ message: "Place added to itinerary" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Server error" });
