@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { getClient } from "../db";
-import { Itinerary } from "../models/itinerary";
+import { Itinerary, Place } from "../models/itinerary";
 import { ObjectId } from "mongodb";
 
 
@@ -13,7 +13,7 @@ itineraryRoutes.get(
     try {
       const client = await getClient();
 
-      const result = client
+      const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
         .find({})
@@ -27,18 +27,18 @@ itineraryRoutes.get(
 
 //get options trip name and its details
 itineraryRoutes.get(
-  "/:name",
+  "/:id",
   async (req: Request, res: Response): Promise<Response> => {
-    const nameTrip = req.params.name as string;
+    const id = new ObjectId(req.params.id);
     try {
       const client = await getClient();
       const result = await client
         .db("final")
         .collection<Itinerary>("itineraries")
-        .findOne({ name: nameTrip });
+        .findOne({ _id: id });
 
       if (!result) {
-        return res.status(404).send("Trip not found");
+        return res.status(404).send("Itinerary not found");
       }
 
       return res.status(200).json(result);
@@ -73,19 +73,24 @@ itineraryRoutes.post(
 itineraryRoutes.put(
   "/:id",
   async (req: Request, res: Response): Promise<Response> => {
+    const place = req.body as Place;
     const itineraryId = req.params.id;
-    const updatedItinerary = req.body as Itinerary;
+
     try {
       const client = await getClient();
-      const results = await client
+      const result = await client
         .db("final")
         .collection("itineraries")
-        .replaceOne({ _id: new ObjectId(itineraryId) }, updatedItinerary);
-      if (!results) {
+        .updateOne(
+          { place_id: itineraryId },
+          { $push: { place: place } }
+        );
+
+      if (result.modifiedCount === 0) {
         return res.status(404).json({ message: "Itinerary not found" });
       }
 
-      return res.json(results);
+      return res.json({ message: "Place added to itinerary" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Server error" });
@@ -95,20 +100,23 @@ itineraryRoutes.put(
 
 //delete 1 option from trip
 itineraryRoutes.delete(
-  "/:id",
+  "/:id/:placeId",
   async (req: Request, res: Response): Promise<Response> => {
-    const id = req.params.id;
+    const itineraryId = req.params.id;
+    const placeId = req.params.placeId;
     try {
       const client = await getClient();
       const result = await client
         .db("final")
-        .collection<Itinerary>("itineraries")
-        .deleteOne({ _id: new ObjectId(id) });
-      if (!result) {
-        return res.status(404).json({ message: "Itinerary not found" });
+        .collection("itineraries")
+        .updateOne(
+          { _id: new ObjectId(itineraryId) },
+          { $pull: { place: { id: placeId } } }
+        );
+      if (!result.modifiedCount) {
+        return res.status(404).json({ message: "Place not found in itinerary" });
       }
-
-      return res.json({ message: "Itinerary option deleted successfully" });
+      return res.json({ message: `From ID ${itineraryId}, ${placeId} was deleted` });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Server error" });
@@ -138,56 +146,3 @@ itineraryRoutes.delete(
     }
   }
 );
-
-itineraryRoutes.delete("/:id/:name", async (req: Request, res: Response) => {
-  // Extract the ID parameter from the request
-  const id = req.params.id;
-  const name = req.params.name;
-
-  try {
-    // Connect to the MongoDB database
-    const client = await getClient();
-
-    // Get a reference to the trips collection
-    const result = await client
-      .db("final")
-      .collection<Itinerary>("itineraries")
-      .updateOne(
-        { _id: new ObjectId(id) },
-        { $pull: { place: { name: name } } }
-      );
-
-    // Check if the object was deleted successfully
-    if (result.modifiedCount === 1) {
-      res.status(200).send(`From ID ${id}, ${name} was deleted.`);
-    } else {
-      res.status(404).send(`Object with ID ${id} not found`);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal server error");
-  }
-});
-
-// itineraryRoutes.delete("/:id", async (res: Response, req: Request) => {
-//   const id = req.params.id;
-//   try {
-//     const client = await getClient();
-//     const placeIdToDelete = new ObjectId(id); // replace with actual ObjectId of the document you want to delete
-
-//     // assuming you have a MongoClient instance set up and connected to your MongoDB database
-//     const result = await client
-//       .db("final")
-//       .collection<Place>("itineraries")
-//       .deleteOne({ _id: placeIdToDelete });
-
-//     if (result.deletedCount === 1) {
-//       console.log(`Successfully deleted place with id ${placeIdToDelete}`);
-//     } else {
-//       console.log(`Could not delete place with id ${placeIdToDelete}`);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Internal server error");
-//   }
-// });
