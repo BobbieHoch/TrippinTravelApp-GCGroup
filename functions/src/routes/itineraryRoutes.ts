@@ -71,10 +71,11 @@ itineraryRoutes.post(
 
 //Edit a trip, Name, date, option  (named and date place is saved)
 itineraryRoutes.put(
-  "/:id",
+  "/:id/:tripName",
   async (req: Request, res: Response): Promise<Response> => {
     const place = req.body as Place;
     const itineraryId = req.params.id;
+    const tripName = req.params.tripName
 
     try {
       const client = await getClient();
@@ -82,7 +83,7 @@ itineraryRoutes.put(
         .db("final")
         .collection("itineraries")
         .updateOne(
-          { place_id: itineraryId },
+          { place_id: itineraryId,tripName: tripName },
           { $push: { place: place } }
         );
 
