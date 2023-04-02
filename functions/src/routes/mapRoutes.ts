@@ -8,6 +8,7 @@ export const mapRoutes = express.Router();
 
 mapRoutes.get("/", async (req: Request, res: Response) => {
   const query = req.query.query as string;
+  const type = req.query.type as string;
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
   const photoReference = req.query.photo_reference as string;
@@ -18,7 +19,7 @@ mapRoutes.get("/", async (req: Request, res: Response) => {
     if (query) {
       result = await getTextSearch(query, radius);
     } else if (lat && lng) {
-      result = await getNearbySearch(lat, lng, radius);
+      result = await getNearbySearch(lat, lng, radius, type);
     } else if (photoReference) {
       result = await getPlacePhotos(photoReference);
     } else if (placeId) {
